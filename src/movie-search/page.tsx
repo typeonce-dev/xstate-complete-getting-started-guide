@@ -20,9 +20,24 @@ export default function Page() {
         <span>{snapshot.context.searchError}</span>
       )}
 
-      {snapshot.context.movies.map((movie) => (
-        <div key={movie.id}>{movie.name}</div>
-      ))}
+      {snapshot.matches("OpenedMovie") ? (
+        <div>
+          <p>{snapshot.context.openedMovie?.name}</p>
+          <button type="button" onClick={() => send({ type: "close-movie" })}>
+            Close
+          </button>
+        </div>
+      ) : (
+        snapshot.context.movies.map((movie) => (
+          <button
+            key={movie.id}
+            type="button"
+            onClick={() => send({ type: "open-movie", movieId: movie.id })}
+          >
+            {movie.name}
+          </button>
+        ))
+      )}
     </div>
   );
 }

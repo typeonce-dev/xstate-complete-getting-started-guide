@@ -20,11 +20,15 @@ const moviesDatabase = [
 
 export const machine = setup({
   types: {
-    events: {} as Readonly<{ type: "updated-search-text"; value: string }>,
+    events: {} as
+      | Readonly<{ type: "updated-search-text"; value: string }>
+      | Readonly<{ type: "open-movie"; movieId: Movie["id"] }>
+      | Readonly<{ type: "close-movie" }>,
     context: {} as Readonly<{
       searchText: string;
       searchError: string;
       movies: Movie[];
+      openedMovie: Movie | null;
     }>,
   },
   actors: {
@@ -55,15 +59,26 @@ export const machine = setup({
     onSearchedError: assign((_, { value }: { value: unknown }) => ({
       searchError: value instanceof Error ? value.message : "Unknown error",
     })),
+    onMovieOpened: assign(
+      ({ context }, { movieId }: { movieId: Movie["id"] }) => ({
+        openedMovie:
+          context.movies.find((movie) => movie.id === movieId) ?? null,
+      })
+    ),
+    onMovieClosed: assign({ openedMovie: null }),
   },
 }).createMachine({
   id: "movie-search-machine",
-  context: { searchText: "", searchError: "", movies: [] },
+  context: { searchText: "", searchError: "", movies: [], openedMovie: null },
   initial: "Idle",
   on: {
     "updated-search-text": {
       target: ".UpdatedSearch",
       actions: { type: "onUpdatedSearchText", params: ({ event }) => event },
+    },
+    "open-movie": {
+      target: ".OpenedMovie",
+      actions: { type: "onMovieOpened", params: ({ event }) => event },
     },
   },
   states: {
@@ -96,5 +111,13 @@ export const machine = setup({
       },
     },
     SearchError: {},
+    OpenedMovie: {
+      on: {
+        "close-movie": {
+          target: "Idle",
+          actions: { type: "onMovieClosed" },
+        },
+      },
+    },
   },
 });
