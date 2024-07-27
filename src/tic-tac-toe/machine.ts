@@ -1,29 +1,34 @@
 import { assign, setup } from "xstate";
 
 type Cell = 1 | 2 | null;
-export type CellIndex = 0 | 1 | 2;
 
-type Board = [[Cell, Cell, Cell], [Cell, Cell, Cell], [Cell, Cell, Cell]];
+type Board = [Cell, Cell, Cell, Cell, Cell, Cell, Cell, Cell, Cell];
 const initBoard: Board = [
-  [null, null, null],
-  [null, null, null],
-  [null, null, null],
+  null,
+  null,
+  null,
+  // row2
+  null,
+  null,
+  null,
+  // row3
+  null,
+  null,
+  null,
 ];
 
 const checkWinner = (board: Board) =>
-  board[0][0] !== null &&
-  ((board[0][0] === board[0][1] && board[0][0] === board[0][2]) ||
-    (board[0][0] === board[1][1] && board[0][0] === board[2][2]) ||
-    (board[0][0] === board[0][1] && board[0][0] === board[0][2]))
-    ? board[0][0]
-    : board[0][1] !== null &&
-      board[0][1] === board[1][1] &&
-      board[0][1] === board[2][1]
-    ? board[0][1]
-    : board[0][2] !== null &&
-      ((board[0][2] === board[1][2] && board[0][2] === board[2][2]) ||
-        (board[0][2] === board[1][1] && board[0][2] === board[0][2]))
-    ? board[0][2]
+  board[0] !== null &&
+  ((board[0] === board[1] && board[0] === board[2]) ||
+    (board[0] === board[4] && board[0] === board[8]) ||
+    (board[0] === board[3] && board[0] === board[6]))
+    ? board[0]
+    : board[1] !== null && board[1] === board[4] && board[1] === board[7]
+    ? board[1]
+    : board[2] !== null &&
+      ((board[2] === board[5] && board[2] === board[8]) ||
+        (board[2] === board[4] && board[2] === board[6]))
+    ? board[2]
     : null;
 
 export const machine = setup({
@@ -31,19 +36,17 @@ export const machine = setup({
     context: {} as Readonly<{
       player1Name: string;
       player2Name: string;
-      winner: 1 | 2 | null;
       board: Board;
     }>,
     events: {} as
       | Readonly<{ type: "update-name-1"; name: string }>
       | Readonly<{ type: "update-name-2"; name: string }>
-      | Readonly<{ type: "end-game"; winner: 1 | 2 | null }>
       | Readonly<{ type: "start-game" }>
       | Readonly<{ type: "restart-game" }>
       | Readonly<{
           type: "pick-cell";
           player: 1 | 2;
-          cell: [CellIndex, CellIndex];
+          cell: number;
         }>,
   },
   guards: {
@@ -51,8 +54,10 @@ export const machine = setup({
       context.player1Name.length > 0 &&
       context.player2Name.length > 0 &&
       context.player1Name !== context.player2Name,
-    canPickCell: ({ context }, { cell }: { cell: [CellIndex, CellIndex] }) =>
-      context.board[cell[0]][cell[1]] === null,
+    canPickCell: ({ context }, { cell }: { cell: number }) =>
+      context.board[cell] === null,
+    isComplete: ({ context }) => context.board.every((cell) => cell !== null),
+    hasWinner: ({ context }) => checkWinner(context.board) !== null,
   },
   actions: {
     onUpdateName1: assign((_, { name }: { name: string }) => ({
@@ -61,19 +66,13 @@ export const machine = setup({
     onUpdateName2: assign((_, { name }: { name: string }) => ({
       player2Name: name,
     })),
-    onGameEnded: assign((_, { winner }: { winner: 1 | 2 | null }) => ({
-      winner,
-    })),
-    onRestartGame: assign({ board: initBoard, winner: null }),
+    onRestartGame: assign({ board: initBoard }),
     onPickCell: assign(
-      (
-        { context },
-        { cell, player }: { player: 1 | 2; cell: [CellIndex, CellIndex] }
-      ) => {
-        let boardCopy: Board = [...context.board];
-        boardCopy[cell[0]][cell[1]] = player;
-        return { board: boardCopy };
-      }
+      ({ context }, { cell, player }: { player: 1 | 2; cell: number }) => ({
+        board: context.board.map((current, i) =>
+          i !== cell ? current : player
+        ) as Board,
+      })
     ),
   },
 }).createMachine({
@@ -82,7 +81,6 @@ export const machine = setup({
     player1Name: "",
     player2Name: "",
     board: initBoard,
-    winner: null,
   },
   initial: "ChooseNames",
   states: {
@@ -101,17 +99,17 @@ export const machine = setup({
       },
     },
     Player1: {
-      entry: ({ context, self }) => {
-        const winner = checkWinner(context.board);
-        if (winner !== null) {
-          self.send({ type: "end-game", winner });
-        }
-      },
-      on: {
-        "end-game": {
-          target: "End",
-          actions: { type: "onGameEnded", params: ({ event }) => event },
+      always: [
+        {
+          guard: "hasWinner",
+          target: "Player2Win",
         },
+        {
+          guard: "isComplete",
+          target: "NoWinner",
+        },
+      ],
+      on: {
         "pick-cell": {
           target: "Player2",
           guard: {
@@ -123,17 +121,17 @@ export const machine = setup({
       },
     },
     Player2: {
-      entry: ({ context, self }) => {
-        const winner = checkWinner(context.board);
-        if (winner !== null) {
-          self.send({ type: "end-game", winner });
-        }
-      },
-      on: {
-        "end-game": {
-          target: "End",
-          actions: { type: "onGameEnded", params: ({ event }) => event },
+      always: [
+        {
+          guard: "hasWinner",
+          target: "Player1Win",
         },
+        {
+          guard: "isComplete",
+          target: "NoWinner",
+        },
+      ],
+      on: {
         "pick-cell": {
           target: "Player1",
           guard: {
@@ -144,7 +142,23 @@ export const machine = setup({
         },
       },
     },
-    End: {
+    NoWinner: {
+      on: {
+        "restart-game": {
+          target: "ChooseNames",
+          actions: { type: "onRestartGame" },
+        },
+      },
+    },
+    Player1Win: {
+      on: {
+        "restart-game": {
+          target: "ChooseNames",
+          actions: { type: "onRestartGame" },
+        },
+      },
+    },
+    Player2Win: {
       on: {
         "restart-game": {
           target: "ChooseNames",

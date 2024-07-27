@@ -1,12 +1,10 @@
 import { useMachine } from "@xstate/react";
-import React from "react";
-import { machine, type CellIndex } from "./machine";
+import { machine } from "./machine";
 
 export default function Page() {
   const [snapshot, send] = useMachine(machine);
   return (
     <div>
-      <pre>{JSON.stringify(snapshot.context.board)}</pre>
       {snapshot.matches("ChooseNames") ? (
         <div>
           <input
@@ -33,12 +31,14 @@ export default function Page() {
         </div>
       ) : (
         <div>
-          {snapshot.matches("End") ? (
+          {snapshot.matches("Player1Win") ||
+          snapshot.matches("Player2Win") ||
+          snapshot.matches("NoWinner") ? (
             <div>
               <p>
-                {snapshot.context.winner === 1
+                {snapshot.matches("Player1Win")
                   ? snapshot.context.player1Name
-                  : snapshot.context.winner === 2
+                  : snapshot.matches("Player2Win")
                   ? snapshot.context.player2Name
                   : "No one"}{" "}
                 won!
@@ -51,55 +51,52 @@ export default function Page() {
               </button>
             </div>
           ) : (
-            <div>
-              <p>
-                {snapshot.matches("Player1")
-                  ? snapshot.context.player1Name
-                  : snapshot.context.player2Name}{" "}
-                is your turn!
-              </p>
-              <div
-                style={{
-                  display: "grid",
-                  maxWidth: "fit-content",
-                  gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-                }}
-              >
-                {snapshot.context.board.map((row, r) => (
-                  <React.Fragment key={r}>
-                    {row.map((col, c) => (
-                      <button
-                        type="button"
-                        key={c}
-                        style={{
-                          border: "1px solid #eee",
-                          background: "transparent",
-                          width: "100px",
-                          height: "100px",
-                        }}
-                        disabled={
-                          !snapshot.can({
-                            type: "pick-cell",
-                            cell: [r as CellIndex, c as CellIndex],
-                            player: snapshot.matches("Player1") ? 1 : 2,
-                          })
-                        }
-                        onClick={() =>
-                          send({
-                            type: "pick-cell",
-                            cell: [r as CellIndex, c as CellIndex],
-                            player: snapshot.matches("Player1") ? 1 : 2,
-                          })
-                        }
-                      >
-                        {col === 1 ? "X" : col === 2 ? "O" : null}
-                      </button>
-                    ))}
-                  </React.Fragment>
-                ))}
-              </div>
-            </div>
+            <p>
+              {snapshot.matches("Player1")
+                ? snapshot.context.player1Name
+                : snapshot.context.player2Name}{" "}
+              is your turn!
+            </p>
           )}
+
+          <div>
+            <div
+              style={{
+                display: "grid",
+                maxWidth: "fit-content",
+                gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+              }}
+            >
+              {snapshot.context.board.map((cell, i) => (
+                <button
+                  type="button"
+                  key={i}
+                  style={{
+                    border: "1px solid #eee",
+                    background: "transparent",
+                    width: "100px",
+                    height: "100px",
+                  }}
+                  disabled={
+                    !snapshot.can({
+                      type: "pick-cell",
+                      cell: i,
+                      player: snapshot.matches("Player1") ? 1 : 2,
+                    })
+                  }
+                  onClick={() =>
+                    send({
+                      type: "pick-cell",
+                      cell: i,
+                      player: snapshot.matches("Player1") ? 1 : 2,
+                    })
+                  }
+                >
+                  {cell === 1 ? "X" : cell === 2 ? "O" : null}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       )}
     </div>
