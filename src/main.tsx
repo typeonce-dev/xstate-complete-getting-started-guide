@@ -5,6 +5,7 @@ import ModalPage from "./modal/page";
 import MoveSearchPage from "./movie-search/page";
 import NotificationsMachinePage from "./notifications/machine/page";
 import NotificationsUseStatePage from "./notifications/use-state/page";
+import NpcPage from "./npc/page";
 import TicTacToePage from "./tic-tac-toe/page";
 import TimerMachinePage from "./timer/machine/page";
 import TimerUseStatePage from "./timer/use-state/page";
@@ -37,6 +38,10 @@ const router = createBrowserRouter([
   {
     path: "/modal",
     element: <ModalPage />,
+  },
+  {
+    path: "/npc",
+    element: <NpcPage />,
   },
 ]);
 
