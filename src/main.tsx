@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import "./index.css";
+import ModalPage from "./modal/page";
 import MoveSearchPage from "./movie-search/page";
 import NotificationsMachinePage from "./notifications/machine/page";
 import NotificationsUseStatePage from "./notifications/use-state/page";
@@ -33,6 +33,10 @@ const router = createBrowserRouter([
   {
     path: "/notifications/machine",
     element: <NotificationsMachinePage />,
+  },
+  {
+    path: "/modal",
+    element: <ModalPage />,
   },
 ]);
 
