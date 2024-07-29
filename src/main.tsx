@@ -3,6 +3,8 @@ import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "./index.css";
 import MoveSearchPage from "./movie-search/page";
+import NotificationsMachinePage from "./notifications/machine/page";
+import NotificationsUseStatePage from "./notifications/use-state/page";
 import TicTacToePage from "./tic-tac-toe/page";
 import TimerMachinePage from "./timer/machine/page";
 import TimerUseStatePage from "./timer/use-state/page";
@@ -23,6 +25,14 @@ const router = createBrowserRouter([
   {
     path: "/tic-tac-toe",
     element: <TicTacToePage />,
+  },
+  {
+    path: "/notifications/use-state",
+    element: <NotificationsUseStatePage />,
+  },
+  {
+    path: "/notifications/machine",
+    element: <NotificationsMachinePage />,
   },
 ]);
 
