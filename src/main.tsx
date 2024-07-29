@@ -4,12 +4,17 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "./index.css";
 import MoveSearchPage from "./movie-search/page";
 import TicTacToePage from "./tic-tac-toe/page";
-import UseStatePage from "./use-state/page";
+import TimerMachinePage from "./timer/machine/page";
+import TimerUseStatePage from "./timer/use-state/page";
 
 const router = createBrowserRouter([
   {
-    path: "/use-state",
-    element: <UseStatePage />,
+    path: "/timer/use-state",
+    element: <TimerUseStatePage />,
+  },
+  {
+    path: "/timer/machine",
+    element: <TimerMachinePage />,
   },
   {
     path: "/movie-search",
