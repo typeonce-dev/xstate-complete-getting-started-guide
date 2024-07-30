@@ -9,7 +9,7 @@ export default function Page() {
         <span>Loading...</span>
       ) : snapshot.matches("Error") ? (
         <>
-          <span>Error while loading notifications</span>
+          <span>{snapshot.context.errorMessage}</span>
           {snapshot.can({ type: "fetch" }) && (
             <button onClick={() => send({ type: "fetch" })}>Reload</button>
           )}

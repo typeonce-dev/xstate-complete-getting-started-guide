@@ -12,67 +12,77 @@ interface Notification {
   message: string;
 }
 
+const getNotifications = fromPromise(
+  () =>
+    new Promise<Notification[]>((resolve) => {
+      setTimeout(() => {
+        resolve([
+          { id: "1", message: "It's time to work" },
+          { id: "2", message: "Up for a meeting?" },
+        ]);
+      }, 1200);
+    })
+);
+
 export const machine = setup({
   types: {
-    events: {} as Readonly<{ type: "fetch" }>,
+    events: {} as { type: "fetch" },
     context: {} as {
       notifications: Notification[];
-      errorStatus: number | null;
+      errorMessage: string;
+      status: number | null;
     },
   },
   guards: {
-    canRetry: ({ context }) =>
-      context.errorStatus === null || context.errorStatus < 500,
+    canReload: ({ context }) => context.status === null || context.status < 500,
   },
-  actors: {
-    fetchNotifications: fromPromise(
-      () =>
-        new Promise<Notification[]>((resolve) => {
-          setTimeout(() => {
-            resolve([
-              { id: "1", message: "It's time to work" },
-              { id: "2", message: "Up for a meeting?" },
-            ]);
-          }, 1200);
-        })
-    ),
-  },
+  actors: { getNotifications },
   actions: {
-    onError: assign((_, { error }: { error: unknown }) => ({
-      errorStatus: error instanceof ApiError ? error.status : null,
+    onUpdateErrorMessage: assign((_, { error }: { error: unknown }) => ({
+      status: error instanceof ApiError ? error.status : null,
+      errorMessage: "Error while loading notifications",
     })),
-    onLoaded: assign(
+    onUpdateNotifications: assign(
       (_, { notifications }: { notifications: Notification[] }) => ({
         notifications,
       })
     ),
   },
 }).createMachine({
-  id: "notifications-machine",
-  context: { notifications: [], errorStatus: null },
+  context: {
+    status: null,
+    errorMessage: "",
+    notifications: [
+      { id: "1", message: "It's time to work" },
+      { id: "2", message: "Up for a meeting?" },
+    ],
+  },
   initial: "Loading",
   states: {
     Loading: {
       invoke: {
-        src: "fetchNotifications",
+        src: "getNotifications",
         onError: {
           target: "Error",
-          actions: { type: "onError", params: ({ event }) => event },
+          actions: {
+            type: "onUpdateErrorMessage",
+            params: ({ event }) => ({ error: event.error }),
+          },
         },
         onDone: {
-          target: "Loaded",
+          target: "Opened",
           actions: {
-            type: "onLoaded",
+            type: "onUpdateNotifications",
             params: ({ event }) => ({ notifications: event.output }),
           },
         },
       },
     },
+    Opened: {},
     Error: {
       on: {
-        fetch: { target: "Loading", guard: "canRetry" },
+        fetch: { guard: "canReload", target: "Loading" },
       },
     },
-    Loaded: {},
   },
 });
