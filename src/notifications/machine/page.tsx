@@ -5,14 +5,15 @@ export default function Page() {
   const [snapshot, send] = useMachine(machine);
   return (
     <div>
-      {snapshot.matches("NotLoaded") ? (
-        <button onClick={() => send({ type: "fetch" })}>
-          Click to load notifications
-        </button>
-      ) : snapshot.matches("Loading") ? (
+      {snapshot.matches("Loading") ? (
         <span>Loading...</span>
       ) : snapshot.matches("Error") ? (
-        <span>{snapshot.context.error}</span>
+        <>
+          <span>Error while loading notifications</span>
+          {snapshot.can({ type: "fetch" }) && (
+            <button onClick={() => send({ type: "fetch" })}>Reload</button>
+          )}
+        </>
       ) : (
         <>
           {snapshot.context.notifications.map((notification) => (

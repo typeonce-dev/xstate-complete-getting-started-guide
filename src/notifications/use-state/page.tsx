@@ -1,4 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+class ApiError {
+  status: number;
+  constructor(status: number) {
+    this.status = status;
+  }
+}
 
 interface Notification {
   id: string;
@@ -6,42 +13,57 @@ interface Notification {
 }
 
 export default function Page() {
-  const [notifications, setNotifications] = useState<Notification[] | null>(
-    null
-  );
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const onLoadNotification = async () => {
-    setNotifications([]);
-    setIsLoading(true);
-    try {
-      const response = await new Promise<Notification[]>((resolve) => {
-        setTimeout(() => {
-          resolve([
-            { id: "1", message: "It's time to work" },
-            { id: "2", message: "Up for a meeting?" },
-          ]);
-        }, 1200);
-      });
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [retry, setRetry] = useState(true);
 
-      setNotifications(response);
-    } catch (e) {
-      setError("Error while loading notifications");
-    } finally {
-      setIsLoading(false);
+  const onLoadNotification = async () => {
+    if (!loading) {
+      try {
+        setError("");
+        setLoading(true);
+        const response = await new Promise<Notification[]>((resolve) => {
+          setTimeout(() => {
+            resolve([
+              { id: "1", message: "It's time to work" },
+              { id: "2", message: "Up for a meeting?" },
+            ]);
+          }, 1200);
+        });
+
+        setOpen(true);
+        setNotifications(response);
+      } catch (e) {
+        if (e instanceof ApiError && e.status >= 500) {
+          setRetry(false);
+          setError("Error while loading notifications");
+        } else {
+          setError("Error while loading notifications, please retry");
+        }
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
+  useEffect(() => {
+    onLoadNotification();
+  }, []);
+
   return (
     <div>
-      {notifications === null ? (
-        <button onClick={onLoadNotification}>
-          Click to load notifications
-        </button>
-      ) : isLoading ? (
-        <span>Loading...</span>
-      ) : error !== null ? (
-        <span>{error}</span>
+      {!open ? (
+        <>
+          {loading && <span>Loading...</span>}
+          {error.length > 0 && (
+            <>
+              <span>{error}</span>
+              {retry && <button onClick={onLoadNotification}>Reload</button>}
+            </>
+          )}
+        </>
       ) : (
         <>
           {notifications.map((notification) => (

@@ -1,5 +1,12 @@
 import { assign, fromPromise, setup } from "xstate";
 
+class ApiError {
+  status: number;
+  constructor(status: number) {
+    this.status = status;
+  }
+}
+
 interface Notification {
   id: string;
   message: string;
@@ -10,8 +17,12 @@ export const machine = setup({
     events: {} as Readonly<{ type: "fetch" }>,
     context: {} as {
       notifications: Notification[];
-      error: string | null;
+      errorStatus: number | null;
     },
+  },
+  guards: {
+    canRetry: ({ context }) =>
+      context.errorStatus === null || context.errorStatus < 500,
   },
   actors: {
     fetchNotifications: fromPromise(
@@ -27,7 +38,9 @@ export const machine = setup({
     ),
   },
   actions: {
-    onError: assign(() => ({ error: "Error while loading notifications" })),
+    onError: assign((_, { error }: { error: unknown }) => ({
+      errorStatus: error instanceof ApiError ? error.status : null,
+    })),
     onLoaded: assign(
       (_, { notifications }: { notifications: Notification[] }) => ({
         notifications,
@@ -36,18 +49,16 @@ export const machine = setup({
   },
 }).createMachine({
   id: "notifications-machine",
-  context: { notifications: [], error: null },
-  initial: "NotLoaded",
+  context: { notifications: [], errorStatus: null },
+  initial: "Loading",
   states: {
-    NotLoaded: {
-      on: {
-        fetch: { target: "Loading" },
-      },
-    },
     Loading: {
       invoke: {
         src: "fetchNotifications",
-        onError: { target: "Error", actions: { type: "onError" } },
+        onError: {
+          target: "Error",
+          actions: { type: "onError", params: ({ event }) => event },
+        },
         onDone: {
           target: "Loaded",
           actions: {
@@ -57,7 +68,11 @@ export const machine = setup({
         },
       },
     },
-    Error: {},
+    Error: {
+      on: {
+        fetch: { target: "Loading", guard: "canRetry" },
+      },
+    },
     Loaded: {},
   },
 });
