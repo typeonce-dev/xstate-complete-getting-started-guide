@@ -5,12 +5,12 @@ interface Context {
   age: number;
 }
 
+const initialContext: Context = { username: "", age: 26 };
+
 type Event =
   | { type: "update-username"; value: string }
   | { type: "update-age"; value: number }
   | { type: "submit"; event: React.FormEvent<HTMLFormElement> };
-
-export const initialState: Context = { username: "", age: 26 };
 
 const submit = fromPromise<void, { event: React.FormEvent<HTMLFormElement> }>(
   async ({ input }) => {
@@ -39,7 +39,7 @@ export const machine = setup({
   },
 }).createMachine({
   id: "form-machine",
-  context: initialState,
+  context: initialContext,
   initial: "Idle",
   states: {
     Idle: {
@@ -50,9 +50,10 @@ export const machine = setup({
         "update-age": {
           actions: { type: "onUpdateAge", params: ({ event }) => event },
         },
+        submit: { target: "Submitting" },
       },
     },
-    Sending: {
+    Submitting: {
       invoke: {
         src: "submit",
         input: ({ event }) => {

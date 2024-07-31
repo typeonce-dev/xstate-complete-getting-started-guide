@@ -1,8 +1,8 @@
 import { useReducer } from "react";
-import { initialState, reducer } from "./reducer";
+import { initialContext, reducer } from "./reducer";
 
 export default function Page() {
-  const [context, send] = useReducer(reducer, initialState);
+  const [context, send] = useReducer(reducer, initialContext);
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     await new Promise<boolean>((resolve) =>

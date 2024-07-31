@@ -3,11 +3,11 @@ interface Context {
   age: number;
 }
 
+export const initialContext: Context = { username: "", age: 26 };
+
 type Event =
   | { type: "update-username"; value: string }
   | { type: "update-age"; value: number };
-
-export const initialState: Context = { username: "", age: 26 };
 
 export const reducer = (context: Context, event: Event): Context => {
   if (event.type === "update-username") {

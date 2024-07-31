@@ -5,10 +5,10 @@ interface Context {
   age: number;
 }
 
-export const initialState: Context = { username: "", age: 26 };
+export const initialContext: Context = { username: "", age: 26 };
 
 export default function Page() {
-  const [context, setContext] = useState<Context>(initialState);
+  const [context, setContext] = useState<Context>(initialContext);
 
   const onUpdateUsername = (value: string) => {
     setContext({ ...context, username: value });
