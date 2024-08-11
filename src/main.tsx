@@ -12,6 +12,8 @@ import NpcPage from "./npc/page";
 import TicTacToePage from "./tic-tac-toe/page";
 import TimerMachinePage from "./timer/machine/page";
 import TimerUseStatePage from "./timer/use-state/page";
+import ToggleMachinePage from "./toggle/machine/page";
+import ToggleUseStatePage from "./toggle/use-state/page";
 
 const router = createBrowserRouter([
   {
@@ -57,6 +59,14 @@ const router = createBrowserRouter([
   {
     path: "/form/machine",
     element: <FormMachinePage />,
+  },
+  {
+    path: "/toggle/machine",
+    element: <ToggleMachinePage />,
+  },
+  {
+    path: "/toggle/use-state",
+    element: <ToggleUseStatePage />,
   },
 ]);
 
