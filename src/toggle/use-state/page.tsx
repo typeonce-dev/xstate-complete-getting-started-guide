@@ -9,5 +9,5 @@ export default function Page() {
 function _Page() {
   const [value, setValue] = useState(false);
   const toggle = () => setValue(!value);
-  return <button onClick={toggle}>{value}</button>;
+  return <button onClick={toggle}>{value ? "On" : "Off"}</button>;
 }
