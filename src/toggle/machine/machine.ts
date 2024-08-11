@@ -1,13 +1,23 @@
 import { setup } from "xstate";
 
+type Event = { type: "toggle" };
+
 export const machine = setup({
   types: {
-    events: {} as { type: "toggle" },
+    events: {} as Event,
   },
 }).createMachine({
   initial: "Off",
   states: {
-    Off: { on: { toggle: { target: "On" } } },
-    On: { on: { toggle: { target: "Off" } } },
+    Off: {
+      on: {
+        toggle: { target: "On" },
+      },
+    },
+    On: {
+      on: {
+        toggle: { target: "Off" },
+      },
+    },
   },
 });
