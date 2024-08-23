@@ -5,6 +5,7 @@ import FormMachinePage from "./form/machine/page";
 import FormReducerPage from "./form/reducer/page";
 import FormUseStatePage from "./form/use-state/page";
 import ModalPage from "./modal/page";
+import MountPage from "./mount/page";
 import MoveSearchPage from "./movie-search/page";
 import NotificationsMachinePage from "./notifications/machine/page";
 import NotificationsUseStatePage from "./notifications/use-state/page";
@@ -77,6 +78,10 @@ const router = createBrowserRouter([
   {
     path: "/toggle/reducer",
     element: <ToggleReducerPage />,
+  },
+  {
+    path: "/mount",
+    element: <MountPage />,
   },
 ]);
 
