@@ -1,8 +1,31 @@
 import { useReducer } from "react";
-import { initialContext, reducer } from "./reducer";
 
-export default function Page() {
+type Event =
+  | { type: "update-username"; value: string }
+  | { type: "update-age"; value: number };
+
+interface Context {
+  username: string;
+  age: number;
+}
+export const initialContext: Context = { username: "", age: 26 };
+
+export const reducer = (context: Context, event: Event): Context => {
+  if (event.type === "update-username") {
+    return { ...context, username: event.value };
+  } else if (event.type === "update-age") {
+    return {
+      ...context,
+      age: isNaN(event.value) ? context.age : event.value,
+    };
+  }
+
+  return context;
+};
+
+export default function UseReducer() {
   const [context, send] = useReducer(reducer, initialContext);
+
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     await new Promise<boolean>((resolve) =>

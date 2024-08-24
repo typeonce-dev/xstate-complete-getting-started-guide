@@ -4,10 +4,9 @@ interface Context {
   username: string;
   age: number;
 }
-
 export const initialContext: Context = { username: "", age: 26 };
 
-export default function Page() {
+export default function UseState() {
   const [context, setContext] = useState<Context>(initialContext);
 
   const onUpdateUsername = (value: string) => {

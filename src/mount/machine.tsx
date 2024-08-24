@@ -8,6 +8,13 @@ type Post = {
   body: string;
 };
 
+type Event =
+  | { type: "update-query"; value: string }
+  | { type: "submit-search" };
+
+type Context = { query: string; posts: Post[] };
+const initialContext = { query: "", posts: [] };
+
 const searchingActor = fromPromise(
   async ({ input }: { input: { query: string } }): Promise<Post[]> =>
     fetch(
@@ -17,10 +24,8 @@ const searchingActor = fromPromise(
 
 export const machine = setup({
   types: {
-    events: {} as
-      | { type: "update-query"; value: string }
-      | { type: "submit-search" },
-    context: {} as { query: string; posts: Post[] },
+    events: {} as Event,
+    context: {} as Context,
   },
   actors: { searchingActor },
   actions: {
@@ -32,7 +37,7 @@ export const machine = setup({
     })),
   },
 }).createMachine({
-  context: { query: "", posts: [] },
+  context: initialContext,
   initial: "Searching",
   states: {
     Searching: {

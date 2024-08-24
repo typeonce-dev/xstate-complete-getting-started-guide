@@ -1,9 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import FormMachinePage from "./form/machine/page";
-import FormReducerPage from "./form/reducer/page";
-import FormUseStatePage from "./form/use-state/page";
+import FormPage from "./form/page";
 import ModalPage from "./modal/page";
 import MountPage from "./mount/page";
 import MoveSearchPage from "./movie-search/page";
@@ -49,16 +47,8 @@ const router = createBrowserRouter([
     element: <NpcPage />,
   },
   {
-    path: "/form/use-state",
-    element: <FormUseStatePage />,
-  },
-  {
-    path: "/form/reducer",
-    element: <FormReducerPage />,
-  },
-  {
-    path: "/form/machine",
-    element: <FormMachinePage />,
+    path: "/form",
+    element: <FormPage />,
   },
   {
     path: "/toggle",

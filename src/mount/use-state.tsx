@@ -7,19 +7,21 @@ type Post = {
   body: string;
 };
 
+type Context = { query: string; posts: Post[] };
+const initialContext = { query: "", posts: [] };
+
 export default function UseState() {
-  const [query, setQuery] = useState("");
-  const [posts, setPosts] = useState<Post[]>([]);
+  const [context, setContext] = useState<Context>(initialContext);
   const [searching, setSearching] = useState(false);
 
   const submitSearch = async () => {
     if (!searching) {
       setSearching(true);
       const newPosts = await fetch(
-        `https://jsonplaceholder.typicode.com/posts?title_like=${query}`
+        `https://jsonplaceholder.typicode.com/posts?title_like=${context.query}`
       ).then((response) => response.json());
 
-      setPosts(newPosts);
+      setContext({ ...context, posts: newPosts });
       setSearching(false);
     }
   };
@@ -37,15 +39,15 @@ export default function UseState() {
       <div>
         <input
           type="search"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          value={context.query}
+          onChange={(e) => setContext({ ...context, query: e.target.value })}
         />
         <button type="button" onClick={submitSearch}>
           Search
         </button>
       </div>
 
-      {posts.map((post) => (
+      {context.posts.map((post) => (
         <div key={post.id}>
           <p>{post.title}</p>
           <p>{post.body}</p>

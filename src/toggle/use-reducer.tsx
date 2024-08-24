@@ -2,6 +2,7 @@ import { useReducer } from "react";
 
 type Event = { type: "toggle" };
 type Context = boolean;
+const initialContext = false;
 
 export const reducer = (context: Context, event: Event): Context => {
   if (event.type === "toggle") {
@@ -12,7 +13,7 @@ export const reducer = (context: Context, event: Event): Context => {
 };
 
 export default function UseReducer() {
-  const [value, send] = useReducer(reducer, false);
+  const [value, send] = useReducer(reducer, initialContext);
   return (
     <button onClick={() => send({ type: "toggle" })}>
       {value ? "On" : "Off"}

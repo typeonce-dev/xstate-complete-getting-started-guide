@@ -1,16 +1,16 @@
+import { useMachine } from "@xstate/react";
 import { assign, fromPromise, setup } from "xstate";
-
-interface Context {
-  username: string;
-  age: number;
-}
-
-const initialContext: Context = { username: "", age: 26 };
 
 type Event =
   | { type: "update-username"; value: string }
   | { type: "update-age"; value: number }
   | { type: "submit"; event: React.FormEvent<HTMLFormElement> };
+
+interface Context {
+  username: string;
+  age: number;
+}
+const initialContext: Context = { username: "", age: 26 };
 
 const submit = fromPromise<void, { event: React.FormEvent<HTMLFormElement> }>(
   async ({ input }) => {
@@ -38,7 +38,6 @@ export const machine = setup({
     })),
   },
 }).createMachine({
-  id: "form-machine",
   context: initialContext,
   initial: "Idle",
   states: {
@@ -69,3 +68,26 @@ export const machine = setup({
     Complete: {},
   },
 });
+
+export default function Machine() {
+  const [snapshot, send] = useMachine(machine);
+  return (
+    <form onSubmit={(event) => send({ type: "submit", event })}>
+      <input
+        type="text"
+        value={snapshot.context.username}
+        onChange={(e) =>
+          send({ type: "update-username", value: e.target.value })
+        }
+      />
+      <input
+        type="number"
+        value={snapshot.context.age}
+        onChange={(e) =>
+          send({ type: "update-age", value: e.target.valueAsNumber })
+        }
+      />
+      <button type="submit">Confirm</button>
+    </form>
+  );
+}

@@ -3,6 +3,7 @@ import { fromTransition } from "xstate";
 
 type Event = { type: "toggle" };
 type Context = boolean;
+const initialContext = false;
 
 export const actor = fromTransition((context: Context, event: Event) => {
   if (event.type === "toggle") {
@@ -10,7 +11,7 @@ export const actor = fromTransition((context: Context, event: Event) => {
   }
 
   return context;
-}, false);
+}, initialContext);
 
 export default function Actor() {
   const [snapshot, send] = useActor(actor);
