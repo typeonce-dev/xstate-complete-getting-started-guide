@@ -4,8 +4,12 @@ type Context = boolean;
 const initialContext = false;
 
 export default function UseState() {
-  const [value, setValue] = useState<Context>(initialContext);
+  const [context, setContext] = useState<Context>(initialContext);
   return (
-    <button onClick={() => setValue(!value)}>{value ? "On" : "Off"}</button>
+    <input
+      type="checkbox"
+      checked={context}
+      onChange={() => setContext(!context)}
+    />
   );
 }

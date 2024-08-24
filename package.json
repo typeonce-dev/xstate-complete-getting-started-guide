@@ -5,8 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "tsc": "tsc -b",
-    "build": "npm run tsc && vite build"
+    "tsc": "tsc -b"
   },
   "dependencies": {
     "@xstate/react": "^4.1.1",

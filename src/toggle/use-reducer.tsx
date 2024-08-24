@@ -8,15 +8,16 @@ export const reducer = (context: Context, event: Event): Context => {
   if (event.type === "toggle") {
     return !context;
   }
-
   return context;
 };
 
 export default function UseReducer() {
-  const [value, send] = useReducer(reducer, initialContext);
+  const [context, send] = useReducer(reducer, initialContext);
   return (
-    <button onClick={() => send({ type: "toggle" })}>
-      {value ? "On" : "Off"}
-    </button>
+    <input
+      type="checkbox"
+      checked={context}
+      onChange={() => send({ type: "toggle" })}
+    />
   );
 }
