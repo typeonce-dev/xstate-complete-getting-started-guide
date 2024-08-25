@@ -1,9 +1,9 @@
-import { useMachine } from "@xstate/react";
+import { useActor } from "@xstate/react";
 import { setup } from "xstate";
 
 type Event = { type: "toggle" };
 
-export const machine = setup({
+const machine = setup({
   types: {
     events: {} as Event,
   },
@@ -24,8 +24,12 @@ export const machine = setup({
 });
 
 export default function Machine() {
-  const [snapshot, send] = useMachine(machine);
+  const [snapshot, send] = useActor(machine);
   return (
-    <button onClick={() => send({ type: "toggle" })}>{snapshot.value}</button>
+    <input
+      type="checkbox"
+      checked={snapshot.value === "On"}
+      onChange={() => send({ type: "toggle" })}
+    />
   );
 }

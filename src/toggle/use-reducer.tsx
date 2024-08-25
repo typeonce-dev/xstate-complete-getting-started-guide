@@ -4,7 +4,7 @@ type Event = { type: "toggle" };
 type Context = boolean;
 const initialContext = false;
 
-export const reducer = (context: Context, event: Event): Context => {
+const reducer = (context: Context, event: Event): Context => {
   if (event.type === "toggle") {
     return !context;
   }

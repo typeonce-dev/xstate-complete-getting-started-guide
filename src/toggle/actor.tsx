@@ -5,7 +5,7 @@ type Event = { type: "toggle" };
 type Context = boolean;
 const initialContext = false;
 
-export const actor = fromTransition((context: Context, event: Event) => {
+const actor = fromTransition((context: Context, event: Event) => {
   if (event.type === "toggle") {
     return !context;
   }
@@ -16,8 +16,10 @@ export const actor = fromTransition((context: Context, event: Event) => {
 export default function Actor() {
   const [snapshot, send] = useActor(actor);
   return (
-    <button onClick={() => send({ type: "toggle" })}>
-      {snapshot.context ? "On" : "Off"}
-    </button>
+    <input
+      type="checkbox"
+      checked={snapshot.context}
+      onChange={() => send({ type: "toggle" })}
+    />
   );
 }
