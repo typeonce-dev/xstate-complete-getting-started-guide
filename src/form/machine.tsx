@@ -1,40 +1,28 @@
 import { useMachine } from "@xstate/react";
 import { assign, fromPromise, setup } from "xstate";
+import { initialContext, postRequest, type Context } from "./shared";
 
 type Event =
-  | { type: "update-username"; value: string }
-  | { type: "update-age"; value: number }
+  | { type: "update-username"; username: string }
   | { type: "submit"; event: React.FormEvent<HTMLFormElement> };
 
-interface Context {
-  username: string;
-  age: number;
-}
-const initialContext: Context = { username: "", age: 26 };
-
-const submit = fromPromise<void, { event: React.FormEvent<HTMLFormElement> }>(
-  async ({ input }) => {
-    input.event.preventDefault();
-    await new Promise<boolean>((resolve) =>
-      setTimeout(() => {
-        resolve(true);
-      }, 1000)
-    );
-  }
-);
+const submitActor = fromPromise<
+  void,
+  { event: React.FormEvent<HTMLFormElement>; context: Context }
+>(async ({ input }) => {
+  input.event.preventDefault();
+  await postRequest(input.context);
+});
 
 export const machine = setup({
   types: {
     context: {} as Context,
     events: {} as Event,
   },
-  actors: { submit },
+  actors: { submitActor },
   actions: {
-    onUpdateUsername: assign((_, { value }: { value: string }) => ({
-      username: value,
-    })),
-    onUpdateAge: assign((_, { value }: { value: number }) => ({
-      age: value,
+    onUpdateUsername: assign((_, { username }: { username: string }) => ({
+      username,
     })),
   },
 }).createMachine({
@@ -44,20 +32,22 @@ export const machine = setup({
     Idle: {
       on: {
         "update-username": {
-          actions: { type: "onUpdateUsername", params: ({ event }) => event },
-        },
-        "update-age": {
-          actions: { type: "onUpdateAge", params: ({ event }) => event },
+          actions: {
+            type: "onUpdateUsername",
+            params: ({ event }) => ({
+              username: event.username,
+            }),
+          },
         },
         submit: { target: "Submitting" },
       },
     },
     Submitting: {
       invoke: {
-        src: "submit",
-        input: ({ event }) => {
+        src: "submitActor",
+        input: ({ event, context }) => {
           if (event.type === "submit") {
-            return { event: event.event };
+            return { event: event.event, context };
           }
 
           throw new Error("Unexpected event");
@@ -77,14 +67,7 @@ export default function Machine() {
         type="text"
         value={snapshot.context.username}
         onChange={(e) =>
-          send({ type: "update-username", value: e.target.value })
-        }
-      />
-      <input
-        type="number"
-        value={snapshot.context.age}
-        onChange={(e) =>
-          send({ type: "update-age", value: e.target.valueAsNumber })
+          send({ type: "update-username", username: e.target.value })
         }
       />
       <button type="submit">Confirm</button>

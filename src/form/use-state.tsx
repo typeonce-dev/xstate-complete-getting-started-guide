@@ -1,29 +1,16 @@
 import { useState } from "react";
-
-interface Context {
-  username: string;
-  age: number;
-}
-export const initialContext: Context = { username: "", age: 26 };
+import { initialContext, postRequest, type Context } from "./shared";
 
 export default function UseState() {
   const [context, setContext] = useState<Context>(initialContext);
 
   const onUpdateUsername = (value: string) => {
-    setContext({ ...context, username: value });
-  };
-
-  const onUpdateAge = (value: number) => {
-    setContext({ ...context, age: value });
+    setContext({ username: value });
   };
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    await new Promise<boolean>((resolve) =>
-      setTimeout(() => {
-        resolve(true);
-      }, 1000)
-    );
+    await postRequest(context);
   };
 
   return (
@@ -32,11 +19,6 @@ export default function UseState() {
         type="text"
         value={context.username}
         onChange={(e) => onUpdateUsername(e.target.value)}
-      />
-      <input
-        type="number"
-        value={context.age}
-        onChange={(e) => onUpdateAge(e.target.valueAsNumber)}
       />
       <button type="submit">Confirm</button>
     </form>
