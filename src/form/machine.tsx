@@ -1,4 +1,4 @@
-import { useMachine } from "@xstate/react";
+import { useActor } from "@xstate/react";
 import { assign, fromPromise, setup } from "xstate";
 import { initialContext, postRequest, type Context } from "./shared";
 
@@ -6,15 +6,18 @@ type Event =
   | { type: "update-username"; username: string }
   | { type: "submit"; event: React.FormEvent<HTMLFormElement> };
 
-const submitActor = fromPromise<
-  void,
-  { event: React.FormEvent<HTMLFormElement>; context: Context }
->(async ({ input }) => {
-  input.event.preventDefault();
-  await postRequest(input.context);
-});
+const submitActor = fromPromise(
+  async ({
+    input,
+  }: {
+    input: { event: React.FormEvent<HTMLFormElement>; context: Context };
+  }) => {
+    input.event.preventDefault();
+    await postRequest(input.context);
+  }
+);
 
-export const machine = setup({
+const machine = setup({
   types: {
     context: {} as Context,
     events: {} as Event,
@@ -27,9 +30,9 @@ export const machine = setup({
   },
 }).createMachine({
   context: initialContext,
-  initial: "Idle",
+  initial: "Editing",
   states: {
-    Idle: {
+    Editing: {
       on: {
         "update-username": {
           actions: {
@@ -39,10 +42,10 @@ export const machine = setup({
             }),
           },
         },
-        submit: { target: "Submitting" },
+        submit: { target: "Loading" },
       },
     },
-    Submitting: {
+    Loading: {
       invoke: {
         src: "submitActor",
         input: ({ event, context }) => {
@@ -60,7 +63,7 @@ export const machine = setup({
 });
 
 export default function Machine() {
-  const [snapshot, send] = useMachine(machine);
+  const [snapshot, send] = useActor(machine);
   return (
     <form onSubmit={(event) => send({ type: "submit", event })}>
       <input
@@ -70,7 +73,9 @@ export default function Machine() {
           send({ type: "update-username", username: e.target.value })
         }
       />
-      <button type="submit">Confirm</button>
+      <button type="submit" disabled={snapshot.matches("Loading")}>
+        Confirm
+      </button>
     </form>
   );
 }

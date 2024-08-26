@@ -3,21 +3,34 @@ import { initialContext, postRequest, type Context } from "./shared";
 
 type Event =
   | { type: "update-username"; value: string }
-  | { type: "update-age"; value: number };
+  | { type: "update-loading"; value: boolean };
 
-export const reducer = (context: Context, event: Event): Context => {
+type ReducerContext = Context & {
+  loading: boolean;
+};
+
+const reducer = (context: ReducerContext, event: Event): ReducerContext => {
   if (event.type === "update-username") {
     return { ...context, username: event.value };
+  } else if (event.type === "update-loading") {
+    return { ...context, loading: event.value };
   }
   return context;
 };
 
 export default function UseReducer() {
-  const [context, send] = useReducer(reducer, initialContext);
+  const [context, send] = useReducer(reducer, {
+    ...initialContext,
+    loading: false,
+  });
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    await postRequest(context);
+    if (!context.loading) {
+      send({ type: "update-loading", value: true });
+      await postRequest(context);
+      send({ type: "update-loading", value: false });
+    }
   };
 
   return (
@@ -29,7 +42,9 @@ export default function UseReducer() {
           send({ type: "update-username", value: e.target.value })
         }
       />
-      <button type="submit">Confirm</button>
+      <button type="submit" disabled={context.loading}>
+        Confirm
+      </button>
     </form>
   );
 }
