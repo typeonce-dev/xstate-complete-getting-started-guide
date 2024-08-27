@@ -1,7 +1,7 @@
 import { useReducer } from "react";
 import { initialContext, postRequest, type Context } from "./shared";
 
-type State = "editing" | "loading" | "error" | "complete";
+type State = "Editing" | "Loading" | "Error" | "Complete";
 
 type Event =
   | { type: "update-username"; value: string }
@@ -23,23 +23,23 @@ const reducer = (context: ReducerContext, event: Event): ReducerContext => {
 export default function UseReducer() {
   const [context, send] = useReducer(reducer, {
     ...initialContext,
-    state: "editing",
+    state: "Editing",
   });
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (context.state !== "loading" && context.state !== "complete") {
-      send({ type: "update-state", value: "loading" });
+    if (context.state !== "Loading" && context.state !== "Complete") {
+      send({ type: "update-state", value: "Loading" });
       try {
         await postRequest(context);
-        send({ type: "update-state", value: "complete" });
+        send({ type: "update-state", value: "Complete" });
       } catch (_) {
-        send({ type: "update-state", value: "error" });
+        send({ type: "update-state", value: "Error" });
       }
     }
   };
 
-  if (context.state === "complete") {
+  if (context.state === "Complete") {
     return <p>Done</p>;
   }
 
@@ -52,10 +52,10 @@ export default function UseReducer() {
           send({ type: "update-username", value: e.target.value })
         }
       />
-      <button type="submit" disabled={context.state === "loading"}>
+      <button type="submit" disabled={context.state === "Loading"}>
         Confirm
       </button>
-      {context.state === "error" && <p>Error occurred</p>}
+      {context.state === "Error" && <p>Error occurred</p>}
     </form>
   );
 }

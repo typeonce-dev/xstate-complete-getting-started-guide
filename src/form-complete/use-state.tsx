@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { initialContext, postRequest, type Context } from "./shared";
 
-type State = "editing" | "loading" | "error" | "complete";
+type State = "Editing" | "Loading" | "Error" | "Complete";
 
 export default function UseState() {
   const [context, setContext] = useState<Context>(initialContext);
-  const [state, setState] = useState<State>("editing");
+  const [state, setState] = useState<State>("Editing");
 
   const onUpdateUsername = (value: string) => {
     setContext({ username: value });
@@ -13,18 +13,18 @@ export default function UseState() {
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (state !== "loading" && state !== "complete") {
-      setState("loading");
+    if (state !== "Loading" && state !== "Complete") {
+      setState("Loading");
       try {
         await postRequest(context);
-        setState("complete");
+        setState("Complete");
       } catch (_) {
-        setState("error");
+        setState("Error");
       }
     }
   };
 
-  if (state === "complete") {
+  if (state === "Complete") {
     return <p>Done</p>;
   }
 
@@ -35,10 +35,10 @@ export default function UseState() {
         value={context.username}
         onChange={(e) => onUpdateUsername(e.target.value)}
       />
-      <button type="submit" disabled={state === "loading"}>
+      <button type="submit" disabled={state === "Loading"}>
         Confirm
       </button>
-      {state === "error" && <p>Error occurred</p>}
+      {state === "Error" && <p>Error occurred</p>}
     </form>
   );
 }

@@ -70,7 +70,6 @@ const machine = setup({
             }),
           },
         },
-        submit: { target: "Loading" },
       },
     },
     Complete: {},
