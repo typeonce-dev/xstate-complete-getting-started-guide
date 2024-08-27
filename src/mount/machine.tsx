@@ -1,25 +1,19 @@
 import { useMachine } from "@xstate/react";
 import { assign, fromPromise, setup } from "xstate";
-
-type Post = {
-  userId: number;
-  id: number;
-  title: string;
-  body: string;
-};
+import {
+  initialContext,
+  searchRequest,
+  type Context,
+  type Post,
+} from "./shared";
 
 type Event =
   | { type: "update-query"; value: string }
   | { type: "submit-search" };
 
-type Context = { query: string; posts: Post[] };
-const initialContext = { query: "", posts: [] };
-
 const searchingActor = fromPromise(
   async ({ input }: { input: { query: string } }): Promise<Post[]> =>
-    fetch(
-      `https://jsonplaceholder.typicode.com/posts?title_like=${input.query}`
-    ).then((response) => response.json())
+    searchRequest(input.query)
 );
 
 export const machine = setup({
@@ -71,11 +65,6 @@ export const machine = setup({
 
 export default function Machine() {
   const [snapshot, send] = useMachine(machine);
-
-  if (snapshot.matches("Searching")) {
-    return <p>Searching...</p>;
-  }
-
   return (
     <div>
       <div>

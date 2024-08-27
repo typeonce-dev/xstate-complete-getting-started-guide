@@ -1,38 +1,17 @@
 import { useEffect, useState } from "react";
-
-type Post = {
-  userId: number;
-  id: number;
-  title: string;
-  body: string;
-};
-
-type Context = { query: string; posts: Post[] };
-const initialContext = { query: "", posts: [] };
+import { initialContext, searchRequest, type Context } from "./shared";
 
 export default function UseState() {
   const [context, setContext] = useState<Context>(initialContext);
-  const [searching, setSearching] = useState(false);
 
   const submitSearch = async () => {
-    if (!searching) {
-      setSearching(true);
-      const newPosts = await fetch(
-        `https://jsonplaceholder.typicode.com/posts?title_like=${context.query}`
-      ).then((response) => response.json());
-
-      setContext({ ...context, posts: newPosts });
-      setSearching(false);
-    }
+    const newPosts = await searchRequest(context.query);
+    setContext({ ...context, posts: newPosts });
   };
 
   useEffect(() => {
     submitSearch();
   }, []);
-
-  if (searching) {
-    return <p>Searching...</p>;
-  }
 
   return (
     <div>

@@ -1,18 +1,14 @@
-import { useEffect, useReducer, useState } from "react";
-
-type Post = {
-  userId: number;
-  id: number;
-  title: string;
-  body: string;
-};
+import { useEffect, useReducer } from "react";
+import {
+  initialContext,
+  searchRequest,
+  type Context,
+  type Post,
+} from "./shared";
 
 type Event =
   | { type: "update-query"; value: string }
   | { type: "update-posts"; newPosts: Post[] };
-
-type Context = { query: string; posts: Post[] };
-const initialContext = { query: "", posts: [] };
 
 const reducer = (context: Context, event: Event): Context => {
   if (event.type === "update-query") {
@@ -26,27 +22,15 @@ const reducer = (context: Context, event: Event): Context => {
 
 export default function UseReducer() {
   const [context, send] = useReducer(reducer, initialContext);
-  const [searching, setSearching] = useState(false);
 
   const submitSearch = async () => {
-    if (!searching) {
-      setSearching(true);
-      const newPosts = await fetch(
-        `https://jsonplaceholder.typicode.com/posts?title_like=${context.query}`
-      ).then((response) => response.json());
-
-      send({ type: "update-posts", newPosts });
-      setSearching(false);
-    }
+    const newPosts = await searchRequest(context.query);
+    send({ type: "update-posts", newPosts });
   };
 
   useEffect(() => {
     submitSearch();
   }, []);
-
-  if (searching) {
-    return <p>Searching...</p>;
-  }
 
   return (
     <div>
