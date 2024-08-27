@@ -16,7 +16,7 @@ const searchingActor = fromPromise(
     searchRequest(input.query)
 );
 
-export const machine = setup({
+const machine = setup({
   types: {
     events: {} as Event,
     context: {} as Context,
