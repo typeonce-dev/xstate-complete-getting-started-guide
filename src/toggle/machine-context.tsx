@@ -2,8 +2,8 @@ import { useActor } from "@xstate/react";
 import { assign, setup } from "xstate";
 
 type Event = { type: "toggle" };
-type Context = { state: boolean };
-const initialContext: Context = { state: false };
+type Context = { toggleValue: boolean };
+const initialContext: Context = { toggleValue: false };
 
 const machine = setup({
   types: {
@@ -11,7 +11,7 @@ const machine = setup({
     context: {} as Context,
   },
   actions: {
-    onToggle: assign(({ context }) => ({ state: !context.state })),
+    onToggle: assign(({ context }) => ({ toggleValue: !context.toggleValue })),
   },
 }).createMachine({
   context: initialContext,
@@ -33,7 +33,7 @@ export default function MachineContext() {
   return (
     <input
       type="checkbox"
-      checked={snapshot.context.state}
+      checked={snapshot.context.toggleValue}
       onChange={() => send({ type: "toggle" })}
     />
   );
