@@ -19,7 +19,7 @@ const reducer = (context: ReducerContext, event: Event): ReducerContext => {
 };
 
 export default function UseReducer() {
-  const [context, send] = useReducer(reducer, {
+  const [context, dispatch] = useReducer(reducer, {
     ...initialContext,
     loading: false,
   });
@@ -27,9 +27,9 @@ export default function UseReducer() {
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!context.loading) {
-      send({ type: "update-loading", value: true });
+      dispatch({ type: "update-loading", value: true });
       await postRequest(context);
-      send({ type: "update-loading", value: false });
+      dispatch({ type: "update-loading", value: false });
     }
   };
 
@@ -39,7 +39,7 @@ export default function UseReducer() {
         type="text"
         value={context.username}
         onChange={(e) =>
-          send({ type: "update-username", value: e.target.value })
+          dispatch({ type: "update-username", value: e.target.value })
         }
       />
       <button type="submit" disabled={context.loading}>

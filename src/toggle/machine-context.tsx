@@ -10,9 +10,6 @@ const machine = setup({
     events: {} as Event,
     context: {} as Context,
   },
-  actions: {
-    onToggle: assign(({ context }) => ({ toggleValue: !context.toggleValue })),
-  },
 }).createMachine({
   context: initialContext,
   initial: "Idle",
@@ -21,7 +18,9 @@ const machine = setup({
       on: {
         toggle: {
           target: "Idle",
-          actions: "onToggle",
+          actions: assign(({ context }) => ({
+            toggleValue: !context.toggleValue,
+          })),
         },
       },
     },

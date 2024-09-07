@@ -1,5 +1,5 @@
 import { useActor } from "@xstate/react";
-import { assign, fromPromise, setup } from "xstate";
+import { assertEvent, assign, fromPromise, setup } from "xstate";
 import { initialContext, postRequest, type Context } from "./shared";
 
 type Event =
@@ -23,11 +23,6 @@ const machine = setup({
     events: {} as Event,
   },
   actors: { submitActor },
-  actions: {
-    onUpdateUsername: assign((_, { username }: { username: string }) => ({
-      username,
-    })),
-  },
 }).createMachine({
   context: initialContext,
   initial: "Editing",
@@ -35,12 +30,9 @@ const machine = setup({
     Editing: {
       on: {
         "update-username": {
-          actions: {
-            type: "onUpdateUsername",
-            params: ({ event }) => ({
-              username: event.username,
-            }),
-          },
+          actions: assign(({ event }) => ({
+            username: event.username,
+          })),
         },
         submit: { target: "Loading" },
       },
@@ -49,11 +41,8 @@ const machine = setup({
       invoke: {
         src: "submitActor",
         input: ({ event, context }) => {
-          if (event.type === "submit") {
-            return { event: event.event, context };
-          }
-
-          throw new Error("Unexpected event");
+          assertEvent(event, "submit");
+          return { event: event.event, context };
         },
         onError: { target: "Error" },
         onDone: { target: "Complete" },
@@ -62,14 +51,11 @@ const machine = setup({
     Error: {
       on: {
         "update-username": {
-          target: "Editing",
-          actions: {
-            type: "onUpdateUsername",
-            params: ({ event }) => ({
-              username: event.username,
-            }),
-          },
+          actions: assign(({ event }) => ({
+            username: event.username,
+          })),
         },
+        submit: { target: "Loading" },
       },
     },
     Complete: {},

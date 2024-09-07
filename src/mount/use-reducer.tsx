@@ -21,11 +21,11 @@ const reducer = (context: Context, event: Event): Context => {
 };
 
 export default function UseReducer() {
-  const [context, send] = useReducer(reducer, initialContext);
+  const [context, dispatch] = useReducer(reducer, initialContext);
 
   const submitSearch = async () => {
     const newPosts = await searchRequest(context.query);
-    send({ type: "update-posts", newPosts });
+    dispatch({ type: "update-posts", newPosts });
   };
 
   useEffect(() => {
@@ -39,7 +39,7 @@ export default function UseReducer() {
           type="search"
           value={context.query}
           onChange={(e) =>
-            send({ type: "update-query", value: e.target.value })
+            dispatch({ type: "update-query", value: e.target.value })
           }
         />
         <button type="button" onClick={submitSearch}>

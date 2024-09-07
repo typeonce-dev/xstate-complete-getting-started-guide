@@ -12,12 +12,12 @@ const reducer = (context: Context, event: Event): Context => {
 };
 
 export default function UseReducer() {
-  const [context, send] = useReducer(reducer, initialContext);
+  const [context, dispatch] = useReducer(reducer, initialContext);
   return (
     <input
       type="checkbox"
       checked={context}
-      onChange={() => send({ type: "toggle" })}
+      onChange={() => dispatch({ type: "toggle" })}
     />
   );
 }

@@ -5,7 +5,9 @@ type State = "Editing" | "Loading" | "Error" | "Complete";
 
 type Event =
   | { type: "update-username"; value: string }
-  | { type: "update-state"; value: State };
+  | { type: "request-start" }
+  | { type: "request-complete" }
+  | { type: "request-fail" };
 
 type ReducerContext = Context & {
   state: State;
@@ -14,14 +16,18 @@ type ReducerContext = Context & {
 const reducer = (context: ReducerContext, event: Event): ReducerContext => {
   if (event.type === "update-username") {
     return { ...context, username: event.value };
-  } else if (event.type === "update-state") {
-    return { ...context, state: event.value };
+  } else if (event.type === "request-start") {
+    return { ...context, state: "Loading" };
+  } else if (event.type === "request-complete") {
+    return { ...context, state: "Complete" };
+  } else if (event.type === "request-fail") {
+    return { ...context, state: "Error" };
   }
   return context;
 };
 
 export default function UseReducer() {
-  const [context, send] = useReducer(reducer, {
+  const [context, dispatch] = useReducer(reducer, {
     ...initialContext,
     state: "Editing",
   });
@@ -29,12 +35,12 @@ export default function UseReducer() {
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (context.state !== "Loading" && context.state !== "Complete") {
-      send({ type: "update-state", value: "Loading" });
+      dispatch({ type: "request-start" });
       try {
         await postRequest(context);
-        send({ type: "update-state", value: "Complete" });
+        dispatch({ type: "request-complete" });
       } catch (_) {
-        send({ type: "update-state", value: "Error" });
+        dispatch({ type: "request-fail" });
       }
     }
   };
@@ -49,7 +55,7 @@ export default function UseReducer() {
         type="text"
         value={context.username}
         onChange={(e) =>
-          send({ type: "update-username", value: e.target.value })
+          dispatch({ type: "update-username", value: e.target.value })
         }
       />
       <button type="submit" disabled={context.state === "Loading"}>

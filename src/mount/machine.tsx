@@ -22,14 +22,6 @@ const machine = setup({
     context: {} as Context,
   },
   actors: { searchingActor },
-  actions: {
-    onUpdatePosts: assign((_, { posts }: { posts: Post[] }) => ({
-      posts,
-    })),
-    onUpdateQuery: assign((_, { query }: { query: string }) => ({
-      query,
-    })),
-  },
 }).createMachine({
   context: initialContext,
   initial: "Searching",
@@ -40,20 +32,18 @@ const machine = setup({
         input: ({ context }) => ({ query: context.query }),
         onDone: {
           target: "Idle",
-          actions: {
-            type: "onUpdatePosts",
-            params: ({ event }) => ({ posts: event.output }),
-          },
+          actions: assign(({ event }) => ({
+            posts: event.output,
+          })),
         },
       },
     },
     Idle: {
       on: {
         "update-query": {
-          actions: {
-            type: "onUpdateQuery",
-            params: ({ event }) => ({ query: event.value }),
-          },
+          actions: assign(({ event }) => ({
+            query: event.value,
+          })),
         },
         "submit-search": {
           target: "Searching",
